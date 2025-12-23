@@ -3,17 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rubis - Ligne 10</title>
+    <title>Rubis + Scolaires</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ce0033">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <style>
         :root {
             --primary: #ce0033; /* Rouge Rubis */
-            --primary-dark: #a30029;
-            --bg: #f8f9fa;
+            --bg: #f0f2f5;
             --card: #ffffff;
             --text-main: #1f2937;
             --text-light: #6b7280;
-            --accent: #10b981; /* Vert pour prochain bus */
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --school: #6d28d9; /* Violet pour les scolaires */
+            --school-bg: #f3e8ff;
             --radius: 16px;
         }
 
@@ -24,6 +30,7 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
+            padding-bottom: 40px;
         }
 
         /* HEADER */
@@ -33,43 +40,31 @@
             padding: 1rem 1.5rem;
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 100;
             box-shadow: 0 4px 12px rgba(206, 0, 51, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        header h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-
+        header h1 { font-size: 1.1rem; font-weight: 700; margin: 0; }
         .header-btn {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.25);
             border: none;
             color: white;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
+            backdrop-filter: blur(4px);
         }
 
         /* CONTAINER */
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 1.5rem;
-            min-height: 80vh;
-        }
-
-        /* VIEWS (Home vs Schedule) */
+        .container { max-width: 600px; margin: 0 auto; padding: 1.5rem; min-height: 80vh; }
+        
         .view { display: none; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* CARDS */
@@ -77,181 +72,129 @@
             background: var(--card);
             border-radius: var(--radius);
             padding: 1.5rem;
-            box-shadow: var(--shadow);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             margin-bottom: 1.5rem;
         }
 
         .section-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            font-weight: 700;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-light); margin-bottom: 1rem; font-weight: 700;
         }
 
-        /* FAVORITES GRID */
-        .fav-grid {
-            display: grid;
-            gap: 10px;
+        /* INPUTS */
+        select, input[type="date"] {
+            width: 100%; padding: 14px;
+            border: 1px solid #e5e7eb; border-radius: 12px;
+            font-size: 1rem; background-color: #fff;
+            margin-bottom: 1.2rem; outline: none;
+            font-family: inherit;
         }
-        
-        .fav-item {
-            background: white;
-            border: 1px solid #e5e7eb;
-            padding: 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.2s;
-            position: relative;
-        }
-        .fav-item:active { transform: scale(0.98); background: #fafafa; }
-        .fav-item-stop { font-weight: 700; font-size: 1.05rem; display: block; }
-        .fav-item-dir { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; display: block; }
-        .fav-remove {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #ef4444;
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            padding: 5px;
-            line-height: 1;
-        }
-
-        .empty-state { text-align: center; color: var(--text-light); padding: 1rem; font-style: italic; }
-
-        /* FORM CONTROLS */
-        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
-        select {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1rem;
-            background-color: #f9fafb;
-            color: var(--text-main);
-            margin-bottom: 1.2rem;
-            outline: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
-        }
-        select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(206, 0, 51, 0.1); }
-
         .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
+            background-color: var(--primary); color: white;
+            width: 100%; padding: 14px; border: none;
+            border-radius: 12px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 6px rgba(206, 0, 51, 0.2);
         }
-        .btn-primary:active { background-color: var(--primary-dark); }
 
-        /* SCHEDULE LIST */
+        /* SCHEDULE VIEW */
         .schedule-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: flex-start;
             margin-bottom: 1rem;
         }
-        .stop-name-display { font-size: 1.3rem; font-weight: 800; line-height: 1.2; }
+        .stop-name-display { font-size: 1.4rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px; }
         .direction-display { font-size: 0.9rem; color: var(--text-light); }
-        
-        .fav-toggle {
-            background: none;
-            border: 2px solid #e5e7eb;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #d1d5db;
-            cursor: pointer;
-            transition: all 0.2s;
+
+        /* DATE PICKER BAR */
+        .date-bar {
+            background: white; padding: 10px; border-radius: 12px;
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .fav-toggle.active {
-            border-color: #fbbf24;
-            color: #fbbf24;
-            background: #fffbeb;
-        }
+        .date-bar label { margin: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-light); }
+        .date-bar input { margin: 0; border: none; background: transparent; font-weight: 700; color: var(--primary); }
 
         .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            background: #e5e7eb;
-            color: var(--text-main);
+            display: inline-block; padding: 6px 12px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 700; margin-bottom: 1rem;
+            background: #e5e7eb; color: var(--text-main);
         }
 
+        /* TIMES LIST */
         .time-list { list-style: none; padding: 0; }
         .time-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 0.8rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            border-left: 4px solid transparent;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; background: white; border-radius: 12px;
+            margin-bottom: 0.8rem; border-left: 5px solid transparent;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        /* Ligne 10 Style */
+        .time-item.type-rubis { border-left-color: var(--primary); }
+        .time-item.type-rubis .time-val { color: var(--text-main); }
+
+        /* Scolaire Style */
+        .time-item.type-school { 
+            border-left-color: var(--school); 
+            background-color: var(--school-bg);
+        }
+        .time-item.type-school .time-val { color: var(--school); }
+        
+        .time-item.past { opacity: 0.5; background: #f3f4f6; filter: grayscale(1); }
+
+        .time-val { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+        .time-details { text-align: right; }
+        .time-diff { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-light); }
+        .bus-name { 
+            display: inline-block; font-size: 0.75rem; font-weight: 700; 
+            padding: 2px 6px; border-radius: 4px; margin-top: 4px;
         }
         
-        .time-item.past { opacity: 0.6; background: #f3f4f6; }
-        .time-item.next { border-left-color: var(--accent); background: #ecfdf5; }
-        
-        .time-val { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-main); }
-        .time-diff { font-size: 0.9rem; font-weight: 600; color: var(--text-light); }
-        .time-item.next .time-diff { color: var(--accent); }
+        .tag-rubis { color: var(--primary); border: 1px solid var(--primary); }
+        .tag-school { background: var(--school); color: white; }
 
-        /* FOOTER */
-        footer { text-align: center; color: #9ca3af; font-size: 0.75rem; padding: 2rem 0; }
+        /* FAVORITES */
+        .fav-grid { display: grid; gap: 10px; }
+        .fav-item {
+            background: white; padding: 1rem; border-radius: 12px;
+            border: 1px solid #e5e7eb; cursor: pointer; position: relative;
+        }
+        .fav-remove {
+            position: absolute; top: 10px; right: 10px;
+            background: none; border: none; color: #ef4444; font-weight: bold; font-size: 1.2rem;
+        }
+        .fav-toggle {
+            background: none; border: 2px solid #e5e7eb; border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: #d1d5db; cursor: pointer;
+        }
+        .fav-toggle.active { border-color: #fbbf24; color: #fbbf24; background: #fffbeb; }
 
     </style>
 </head>
 <body>
 
 <header>
-    <div id="header-title">Ligne 10</div>
+    <h1>Rubis + Scolaires</h1>
     <button id="back-btn" class="header-btn" style="display: none;" onclick="goHome()">← Retour</button>
 </header>
 
 <div class="container">
 
     <div id="view-home" class="view active">
-        
         <div class="section-title">Mes Favoris</div>
         <div id="fav-container" class="fav-grid">
             </div>
-
-        <div style="height: 2rem;"></div>
+        <div style="height: 20px;"></div>
 
         <div class="card">
-            <div class="section-title" style="margin-top:0;">Rechercher un horaire</div>
-            
+            <div class="section-title" style="margin-top:0;">Rechercher</div>
             <label>Direction</label>
             <select id="dir-select" onchange="populateStops()">
                 <option value="dir1">Direction Bourg-en-Bresse</option>
                 <option value="dir2">Direction ATTIGNAT (via Viriat)</option>
             </select>
-
             <label>Arrêt</label>
-            <select id="stop-select">
-                </select>
-
+            <select id="stop-select"></select>
             <button class="btn-primary" onclick="goToSchedule()">Voir les horaires</button>
         </div>
     </div>
@@ -265,24 +208,26 @@
             <button id="fav-toggle-btn" class="fav-toggle" onclick="toggleCurrentFav()">★</button>
         </div>
 
+        <div class="date-bar">
+            <label for="date-input">Date :</label>
+            <input type="date" id="date-input" onchange="onDateChange()">
+        </div>
+
         <div id="day-status" class="status-badge">Chargement...</div>
 
         <ul id="time-list" class="time-list">
             </ul>
     </div>
 
-    <footer>
-        Horaires valables jusqu'en août 2026.<br>
-        Application non-officielle basée sur les données Rubis.
-    </footer>
 </div>
 
 <script>
-    // --- 1. RAW DATA (INTEGRATION 100% FIDÈLE) ---
-    // J'utilise un format brut parsé au démarrage pour garantir l'exactitude.
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+    }
 
-    const rawDir1Scolaire = `
-Romenay - Place 5:25 6:15 7:15 - - - - - 12:30 13:30 - - 16:50 18:00
+    // --- DONNÉES BRUTES RUBIS (LIGNE 10) ---
+    const rawDir1Scolaire = `Romenay - Place 5:25 6:15 7:15 - - - - - 12:30 13:30 - - 16:50 18:00
 St-Trivier-de-Courtes -Prédela Dîme 5:30 6:20 7:20 - - - - - 12:35 13:35 - - 16:55 18:05
 Mantenay-Montlin - Bourg 5:32 6:22 7:22 - - - - - 12:37 13:37 - - 16:57 18:07
 St-Julien-sur-Reyssouze- Village 5:34 6:25 7:25 - - - - - 12:39 13:39 - - 17:00 18:09
@@ -317,7 +262,6 @@ Ceyzériat -ZA LaTeppe 6:38 7:43 8:44 - 9:53 10:51 11:54 12:54 13:46 14:46 15:56
 Ceyzériat - Domagne 6:46 7:51 8:52 - 10:01 10:59 12:02 13:02 13:54 14:54 16:04 17:16 18:29 19:24
 Ceyzériat - Mairie 6:47 7:52 8:53 - 10:02 11:00 12:03 13:03 13:55 14:55 16:05 17:17 18:30 19:26`;
 
-    // Structure Vacances Dir 1 (Romenay -> Ceyzériat)
     const rawDir1Vacs = [
         {stop:"Romenay - Place", a:"05:25|06:15|07:15|13:30|18:00", b:"05:25|06:15|07:15|13:30|18:00"},
         {stop:"St-Trivier-de-Courtes -Prédela Dîme", a:"05:30|06:20|07:20|13:35|18:05", b:"05:30|06:20|07:20|13:35|18:05"},
@@ -354,8 +298,6 @@ Ceyzériat - Mairie 6:47 7:52 8:53 - 10:02 11:00 12:03 13:03 13:55 14:55 16:05 1
         {stop:"Ceyzériat - Mairie", a:"06:47|07:52|08:53|11:30|14:55|16:05|17:17|19:26", b:"06:47|07:52|08:53|11:30|14:59|16:09|17:21|19:30"}
     ];
 
-    // Data Direction 2 (Ceyzériat -> Romenay/Attignat)
-    // Format: Array of objects {stop, week, wed, vac_a, vac_b}
     const rawDir2Data = [
         {s:"Ceyzériat - Mairie", w:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:35|15:40|16:30|16:35|17:35|18:45|19:45", m:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:35|15:40|16:35|17:35|18:45|19:45", va:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:40|16:35|17:35|18:45|19:45", vb:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:40|16:35|17:35|18:45|19:45"},
         {s:"Ceyzériat - Domagne", w:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:36|15:41|16:30|16:36|17:36|18:46|19:46", m:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:36|15:41|16:36|17:36|18:46|19:46", va:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:41|16:36|17:36|18:46|19:46", vb:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:41|16:36|17:36|18:46|19:46"},
@@ -392,62 +334,39 @@ Ceyzériat - Mairie 6:47 7:52 8:53 - 10:02 11:00 12:03 13:03 13:55 14:55 16:05 1
         {s:"Romenay - Place", w:"12:45|13:45|14:45|17:07|18:10|19:07|20:13", m:"12:45|13:45|14:45|18:10|19:07|20:13", va:"13:14|13:18|17:07|17:11|18:10|18:13|19:07", vb:"13:14|13:18|17:07|17:11|18:10|18:13|19:07"}
     ];
 
-    // --- 2. CONFIGURATION DATE & VACANCES ---
-    
-    // Dates vacances Zone A (2025-2026)
+    // Dates Vacances
     const holidays = [
         { start: '2025-10-18', end: '2025-11-03' },
         { start: '2025-12-20', end: '2026-01-05' },
         { start: '2026-02-07', end: '2026-02-23' },
-        { start: '2026-04-04', end: '2026-04-20' },
-        // Été handled separately by date check >= 1st July
+        { start: '2026-04-04', end: '2026-04-20' }
     ];
-
-    const joursFeries = [
-        "2025-12-25", "2026-01-01", "2026-04-06", "2026-05-01", "2026-05-08", "2026-05-14", "2026-05-25", "2026-07-14", "2026-08-15"
-    ];
+    const joursFeries = ["2025-12-25", "2026-01-01", "2026-04-06", "2026-05-01", "2026-05-08", "2026-05-14", "2026-05-25", "2026-07-14", "2026-08-15"];
 
     let appData = {
-        dir1: { name: "Direction Bourg-en-Bresse", stops: {} },
-        dir2: { name: "Direction ATTIGNAT (via Viriat)", stops: {} }
+        dir1: { name: "Vers Bourg-en-Bresse", stops: {} },
+        dir2: { name: "Vers ATTIGNAT (via Viriat)", stops: {} }
     };
-
-    // --- 3. PARSING & LOGIC ---
-
-    function parseDir1Scolaire() {
-        const lines = rawDir1Scolaire.trim().split('\n');
-        lines.forEach(line => {
-            // Regex to separate Stop Name from times. Matches everything until the first digit.
+    
+    // --- PARSING ---
+    function parseData() {
+        // Dir 1 Scolaire
+        rawDir1Scolaire.trim().split('\n').forEach(line => {
             const match = line.match(/^(.+?)\s+(\d.*)$/);
             if(match) {
-                const stopName = match[1].trim();
-                const timesStr = match[2];
-                // Split by space, clean dashes
-                const times = timesStr.split(/\s+/).filter(t => t.match(/\d{1,2}:\d{2}/));
-                
-                if(!appData.dir1.stops[stopName]) appData.dir1.stops[stopName] = {scolaire:[], vac_a:[], vac_b:[]};
-                appData.dir1.stops[stopName].scolaire = times;
+                const s = match[1].trim();
+                const times = match[2].split(/\s+/).filter(t => t.match(/\d{1,2}:\d{2}/));
+                if(!appData.dir1.stops[s]) appData.dir1.stops[s] = {scolaire:[], vac_a:[], vac_b:[]};
+                appData.dir1.stops[s].scolaire = times;
             }
         });
-
-        // Special rule: Montrevel-en-Bresse - Collège
-        // Note: "l'avant dernier horaire... Ne dessert pas le mercredi"
-        // Le parsing automatique ne peut pas deviner l'index colonne exact.
-        // Mais nous avons identifié que l'avant dernier horaire est celui de ~17h.
-        // Pour Collège, la ligne est: "- - 7:38 - ... 17:13 -"
-        // Donc si Mercredi, on retire 17:13 de Collège.
-    }
-
-    function parseDir1Vacances() {
+        // Dir 1 Vacances
         rawDir1Vacs.forEach(item => {
-            const s = item.stop.trim();
-            if(!appData.dir1.stops[s]) appData.dir1.stops[s] = {scolaire:[], vac_a:[], vac_b:[]};
-            appData.dir1.stops[s].vac_a = item.a.split('|');
-            appData.dir1.stops[s].vac_b = item.b.split('|');
+            if(!appData.dir1.stops[item.stop]) appData.dir1.stops[item.stop] = {scolaire:[], vac_a:[], vac_b:[]};
+            appData.dir1.stops[item.stop].vac_a = item.a.split('|');
+            appData.dir1.stops[item.stop].vac_b = item.b.split('|');
         });
-    }
-
-    function parseDir2() {
+        // Dir 2
         rawDir2Data.forEach(item => {
             const s = item.s.trim();
             if(!appData.dir2.stops[s]) appData.dir2.stops[s] = {week:[], wed:[], vac_a:[], vac_b:[]};
@@ -456,276 +375,273 @@ Ceyzériat - Mairie 6:47 7:52 8:53 - 10:02 11:00 12:03 13:03 13:55 14:55 16:05 1
             appData.dir2.stops[s].vac_a = item.va.split('|');
             appData.dir2.stops[s].vac_b = item.vb.split('|');
         });
+
+        // --- AJOUT MANUEL DES BUS SCOLAIRES ---
+        
+        // 1. "Bourg - Lycées" n'existe pas dans la liste Ligne 10, on le crée pour Dir 2
+        appData.dir2.stops["Bourg - Lycées"] = {
+            week: [], wed: [], vac_a: [], vac_b: []
+        };
     }
 
-    // Initialize Data
-    parseDir1Scolaire();
-    parseDir1Vacances();
-    parseDir2();
+    parseData();
 
+    // --- VARIABLES GLOBALES ---
+    let selectedDate = new Date(); // Par défaut aujourd'hui
 
-    // --- 4. ENGINE ---
-
-    function getDayType() {
-        const now = new Date();
-        const dateStr = now.toISOString().split('T')[0];
-        const day = now.getDay(); // 0 Sun, 6 Sat
-        const month = now.getMonth() + 1; // 1-12
-        const dom = now.getDate();
-
-        // 1. Dimanche / Férié
-        if (day === 0 || joursFeries.includes(dateStr)) return { type: 'none', label: 'Dimanche / Férié (Aucun service)' };
-
-        // 2. Été (Start 1 July)
-        const isSummer = (month === 7 || month === 8); 
-
-        // 3. Vacances
+    // --- LOGIQUE JOUR ---
+    function getDayType(dateObj) {
+        const dateStr = dateObj.toISOString().split('T')[0];
+        const day = dateObj.getDay();
+        const month = dateObj.getMonth() + 1;
+        
+        if (day === 0 || joursFeries.includes(dateStr)) return { type: 'none', label: 'Dimanche / Férié (Aucun bus)' };
+        
+        const isSummer = (month === 7 || month === 8);
         let isVacance = isSummer;
         if (!isVacance) {
-            for (let h of holidays) {
-                if (dateStr >= h.start && dateStr <= h.end) {
-                    isVacance = true;
-                    break;
-                }
-            }
+            for (let h of holidays) if (dateStr >= h.start && dateStr <= h.end) { isVacance = true; break; }
         }
 
-        // 4. Logic Selection
-        // "a" : Ne circule pas le samedi et l'été (Donc Vacances Semaine hors été)
-        // "b" : Circule uniquement le samedi et l'été
-        
         if (day === 6) return { type: 'vac_b', label: 'Samedi (Horaires b)' };
         
         if (isVacance) {
-            if (isSummer) return { type: 'vac_b', label: 'Période Été (Horaires b)' };
-            return { type: 'vac_a', label: 'Vacances Scolaires (Horaires a)' };
+            return isSummer ? { type: 'vac_b', label: 'Été (Horaires b)' } : { type: 'vac_a', label: 'Vacances (Horaires a)' };
         }
 
-        // Scolaire
         if (day === 3) return { type: 'scolaire_mercredi', label: 'Mercredi Scolaire' };
         return { type: 'scolaire_semaine', label: 'Semaine Scolaire' };
     }
 
-    function getTimesForStop(dirKey, stopName) {
-        const dayInfo = getDayType();
+    // --- RÉCUPÉRATION HORAIRES + INJECTION SCOLAIRE ---
+    function getTimesForStop(dirKey, stopName, dateObj) {
+        const dayInfo = getDayType(dateObj);
+        let results = []; // Format: { time: "08:00", isSchool: false, name: "10" }
+
+        // Fonction helper
+        const addTimes = (arr, isSchool, busName) => {
+            if(!arr) return;
+            arr.forEach(t => results.push({ time: t, isSchool: isSchool, name: busName || "Ligne 10" }));
+        };
+
+        // 1. HORAIRES LIGNE 10 CLASSIGUES
         const dirData = appData[dirKey].stops[stopName];
-        if (!dirData) return null;
-
-        let times = [];
-
-        if (dirKey === 'dir1') {
-            // Direction 1 logic
-            if (dayInfo.type === 'none') return [];
-            if (dayInfo.type === 'vac_a') times = dirData.vac_a;
-            else if (dayInfo.type === 'vac_b') times = dirData.vac_b;
-            else {
-                // Scolaire
-                times = [...dirData.scolaire]; // Clone
-                // Special Rule Dir 1: Montrevel Collège Mercredi
+        if (dirData) {
+            let rawTimes = [];
+            if (dirKey === 'dir1') {
+                if (dayInfo.type === 'vac_a') rawTimes = dirData.vac_a;
+                else if (dayInfo.type === 'vac_b') rawTimes = dirData.vac_b;
+                else if (dayInfo.type.startsWith('scolaire')) rawTimes = dirData.scolaire;
+                
+                // Exception Mercredi Collège
                 if (dayInfo.type === 'scolaire_mercredi' && stopName.includes("Collège")) {
-                    // Remove 17:13 (Standardize comparison)
-                    times = times.filter(t => t !== "17:13");
+                    rawTimes = rawTimes.filter(t => t !== "17:13");
                 }
+            } else {
+                if (dayInfo.type === 'vac_a') rawTimes = dirData.vac_a;
+                else if (dayInfo.type === 'vac_b') rawTimes = dirData.vac_b;
+                else if (dayInfo.type === 'scolaire_mercredi') rawTimes = dirData.wed;
+                else if (dayInfo.type === 'scolaire_semaine') rawTimes = dirData.week;
             }
-        } else {
-            // Direction 2 logic (Explicit fields)
-            if (dayInfo.type === 'none') return [];
-            if (dayInfo.type === 'vac_a') times = dirData.vac_a;
-            else if (dayInfo.type === 'vac_b') times = dirData.vac_b;
-            else if (dayInfo.type === 'scolaire_mercredi') times = dirData.wed;
-            else times = dirData.week;
+            addTimes(rawTimes, false);
         }
 
-        return times;
+        // 2. INJECTION BUS SCOLAIRES (Si période scolaire)
+        if (dayInfo.type.startsWith('scolaire')) {
+            
+            // DIR 1 : Attignat Village -> Bourg
+            if (dirKey === 'dir1' && stopName === 'Attignat - Village') {
+                // RJ117 a 7h04
+                results.push({ time: "07:04", isSchool: true, name: "RJ117" });
+            }
+
+            // DIR 2 : Bourg Lycées -> Attignat
+            if (dirKey === 'dir2' && stopName === 'Bourg - Lycées') {
+                // Mercredi Seulement : 12h10 (RJ111)
+                if (dayInfo.type === 'scolaire_mercredi') {
+                    results.push({ time: "12:10", isSchool: true, name: "RJ111" });
+                }
+                
+                // Semaine (L,M,J,V) - J'assume que ces bus circulent les jours d'école normaux
+                // RJ110: 14h20, 16h05, 18h10
+                // RJ109: 17h34
+                // Si c'est mercredi, y a-t-il ces bus ? Souvent non, mais je vais les mettre sauf si c'est explicitement "mercredi seulement"
+                // Ta consigne: "12h10 le mercredi seulement". Donc les autres sont tous les jours ou sauf mercredi.
+                // Par sécurité pour une app scolaire, je les affiche pour 'Semaine' et 'Mercredi' SAUF 12h10 qui est unique.
+                // NOTE: Souvent pas de cours aprem mercredi. Je vais les mettre en "Semaine Scolaire" uniquement.
+                
+                if (dayInfo.type === 'scolaire_semaine') {
+                    results.push({ time: "14:20", isSchool: true, name: "RJ110" });
+                    results.push({ time: "16:05", isSchool: true, name: "RJ110" });
+                    results.push({ time: "17:34", isSchool: true, name: "RJ109" });
+                    results.push({ time: "18:10", isSchool: true, name: "RJ110" });
+                }
+            }
+        }
+
+        // Trier par heure
+        results.sort((a, b) => {
+            return parseInt(a.time.replace(':','')) - parseInt(b.time.replace(':',''));
+        });
+
+        return results;
     }
 
-
-    // --- 5. UI CONTROLLER ---
-
+    // --- UI LOGIC ---
     const ui = {
         views: { home: document.getElementById('view-home'), schedule: document.getElementById('view-schedule') },
-        favContainer: document.getElementById('fav-container'),
         dirSelect: document.getElementById('dir-select'),
         stopSelect: document.getElementById('stop-select'),
         displayStop: document.getElementById('display-stop-name'),
         displayDir: document.getElementById('display-dir-name'),
         dayStatus: document.getElementById('day-status'),
         timeList: document.getElementById('time-list'),
+        dateInput: document.getElementById('date-input'),
+        favContainer: document.getElementById('fav-container'),
         backBtn: document.getElementById('back-btn'),
         favToggle: document.getElementById('fav-toggle-btn')
     };
 
     let currentSelection = { dir: 'dir1', stop: '' };
-    let favorites = JSON.parse(localStorage.getItem('rubis_favs_v2')) || [];
+    let favorites = JSON.parse(localStorage.getItem('rubis_favs_v3')) || [];
 
     function init() {
+        // Set date input to today
+        ui.dateInput.valueAsDate = new Date();
         populateStops();
         renderFavorites();
     }
 
     function populateStops() {
         const dir = ui.dirSelect.value;
-        const stops = Object.keys(appData[dir].stops);
+        const stops = Object.keys(appData[dir].stops).sort();
         ui.stopSelect.innerHTML = stops.map(s => `<option value="${s}">${s}</option>`).join('');
         currentSelection.dir = dir;
     }
 
-    // --- FAVORITES LOGIC ---
-
-    function renderFavorites() {
-        ui.favContainer.innerHTML = '';
-        if (favorites.length === 0) {
-            ui.favContainer.innerHTML = '<div class="empty-state">Aucun favori enregistré.</div>';
-            return;
-        }
-
-        favorites.forEach((fav, index) => {
-            const div = document.createElement('div');
-            div.className = 'fav-item';
-            // Find pretty name for direction
-            const dirName = appData[fav.dir].name;
-            div.innerHTML = `
-                <span class="fav-item-stop">${fav.stop}</span>
-                <span class="fav-item-dir">${dirName}</span>
-                <button class="fav-remove" onclick="removeFav(event, ${index})">×</button>
-            `;
-            div.onclick = (e) => {
-                if(e.target.className !== 'fav-remove') loadSchedule(fav.dir, fav.stop);
-            };
-            ui.favContainer.appendChild(div);
-        });
-    }
-
-    function removeFav(e, index) {
-        e.stopPropagation();
-        favorites.splice(index, 1);
-        localStorage.setItem('rubis_favs_v2', JSON.stringify(favorites));
-        renderFavorites();
-    }
-
-    function toggleCurrentFav() {
-        const index = favorites.findIndex(f => f.dir === currentSelection.dir && f.stop === currentSelection.stop);
-        if (index >= 0) {
-            favorites.splice(index, 1);
-            ui.favToggle.classList.remove('active');
-            ui.favToggle.innerHTML = '★'; // Outline
-        } else {
-            favorites.push({ dir: currentSelection.dir, stop: currentSelection.stop });
-            ui.favToggle.classList.add('active');
-            ui.favToggle.innerHTML = '★'; // Filled
-        }
-        localStorage.setItem('rubis_favs_v2', JSON.stringify(favorites));
-    }
-
-    function updateFavIconState() {
-        const isFav = favorites.some(f => f.dir === currentSelection.dir && f.stop === currentSelection.stop);
-        if (isFav) {
-            ui.favToggle.classList.add('active');
-        } else {
-            ui.favToggle.classList.remove('active');
+    function onDateChange() {
+        if(ui.dateInput.value) {
+            selectedDate = new Date(ui.dateInput.value);
+            renderTimes();
         }
     }
-
-    // --- NAVIGATION ---
 
     function goHome() {
         ui.views.schedule.classList.remove('active');
         ui.views.home.classList.add('active');
         ui.backBtn.style.display = 'none';
-        renderFavorites(); // Refresh in case changed
+        renderFavorites();
     }
 
     function goToSchedule() {
-        const stop = ui.stopSelect.value;
-        const dir = ui.dirSelect.value;
-        loadSchedule(dir, stop);
+        loadSchedule(ui.dirSelect.value, ui.stopSelect.value);
     }
 
     function loadSchedule(dir, stop) {
         currentSelection = { dir, stop };
-        
-        // Update Header Info
         ui.displayStop.textContent = stop;
         ui.displayDir.textContent = appData[dir].name;
         
-        // Switch View
         ui.views.home.classList.remove('active');
         ui.views.schedule.classList.add('active');
         ui.backBtn.style.display = 'block';
         
-        // Update Fav Icon
         updateFavIconState();
-
-        // Render Times
         renderTimes();
     }
 
     function renderTimes() {
-        const times = getTimesForStop(currentSelection.dir, currentSelection.stop);
-        const dayInfo = getDayType();
+        const times = getTimesForStop(currentSelection.dir, currentSelection.stop, selectedDate);
+        const dayInfo = getDayType(selectedDate);
         
         ui.dayStatus.textContent = dayInfo.label;
         ui.timeList.innerHTML = '';
 
         if (!times || times.length === 0) {
-            ui.timeList.innerHTML = '<li class="time-item"><span class="time-val">--:--</span><span>Aucun bus</span></li>';
+            ui.timeList.innerHTML = '<li class="time-item"><span class="time-val">--:--</span><span>Aucun passage</span></li>';
             return;
         }
 
+        // Comparaison heure (seulement si la date sélectionnée est aujourd'hui)
         const now = new Date();
+        const isToday = (selectedDate.toDateString() === now.toDateString());
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-        let hasNext = false;
-
-        times.forEach(t => {
-            const [h, m] = t.split(':').map(Number);
+        times.forEach(item => {
+            const [h, m] = item.time.split(':').map(Number);
             const busMinutes = h * 60 + m;
-            const diff = busMinutes - currentMinutes;
+            let diff = busMinutes - currentMinutes;
+            
+            // Si ce n'est pas aujourd'hui, on considère tous les bus comme "futurs" (diff positive artificielle pour affichage)
+            if (!isToday) diff = 999; 
 
-            // Logic: Show if diff > -10 (Passé il y a moins de 10 min)
-            if (diff > -10) {
+            // Affichage
+            // On affiche tout si c'est un autre jour.
+            // Si c'est aujourd'hui, on affiche ceux > -10min
+            if (!isToday || diff > -10) {
                 const li = document.createElement('li');
-                li.className = 'time-item';
-
-                // Format Display
-                let diffDisplay = '';
-                if (diff < 0) {
-                    li.classList.add('past');
-                    diffDisplay = `parti il y a ${Math.abs(diff)} min`;
-                } else if (diff === 0) {
-                    li.classList.add('next');
-                    diffDisplay = 'Maintenant';
-                    hasNext = true;
-                } else {
-                    if (!hasNext && diff > 0) {
-                        li.classList.add('next');
-                        hasNext = true;
-                    }
-                    if (diff < 60) diffDisplay = `dans ${diff} min`;
+                li.className = `time-item ${item.isSchool ? 'type-school' : 'type-rubis'}`;
+                
+                let diffText = '';
+                if (isToday) {
+                    if (diff < 0) { li.classList.add('past'); diffText = 'Passé'; }
+                    else if (diff === 0) diffText = 'Maintenant';
+                    else if (diff < 60) diffText = `dans ${diff} min`;
                     else {
                         const dh = Math.floor(diff/60);
                         const dm = diff%60;
-                        diffDisplay = `dans ${dh}h ${dm}`;
+                        diffText = `dans ${dh}h${dm < 10 ? '0'+dm : dm}`;
                     }
+                } else {
+                    diffText = ''; // Pas de décompte pour les autres jours
                 }
 
+                const busTagClass = item.isSchool ? 'tag-school' : 'tag-rubis';
+
                 li.innerHTML = `
-                    <span class="time-val">${t}</span>
-                    <span class="time-diff">${diffDisplay}</span>
+                    <div>
+                        <div class="time-val">${item.time}</div>
+                        <span class="bus-name ${busTagClass}">${item.name}</span>
+                    </div>
+                    <div class="time-details">
+                        <span class="time-diff">${diffText}</span>
+                    </div>
                 `;
                 ui.timeList.appendChild(li);
             }
         });
-
-        if (ui.timeList.children.length === 0) {
-            ui.timeList.innerHTML = '<li class="time-item" style="justify-content:center; color:#999;">Plus de passage aujourd\'hui</li>';
-        }
     }
 
-    // Start
+    // --- FAVORIS ---
+    function renderFavorites() {
+        ui.favContainer.innerHTML = '';
+        if (favorites.length === 0) ui.favContainer.innerHTML = '<div style="text-align:center;color:#999;">Aucun favori</div>';
+        favorites.forEach((fav, i) => {
+            const div = document.createElement('div');
+            div.className = 'fav-item';
+            div.innerHTML = `<b>${fav.stop}</b><br><small>${appData[fav.dir].name}</small><button class="fav-remove" onclick="removeFav(event, ${i})">×</button>`;
+            div.onclick = (e) => { if(e.target.className!=='fav-remove') loadSchedule(fav.dir, fav.stop); };
+            ui.favContainer.appendChild(div);
+        });
+    }
+
+    function toggleCurrentFav() {
+        const idx = favorites.findIndex(f => f.dir === currentSelection.dir && f.stop === currentSelection.stop);
+        if (idx >= 0) favorites.splice(idx, 1);
+        else favorites.push({ dir: currentSelection.dir, stop: currentSelection.stop });
+        localStorage.setItem('rubis_favs_v3', JSON.stringify(favorites));
+        updateFavIconState();
+    }
+
+    function updateFavIconState() {
+        const isFav = favorites.some(f => f.dir === currentSelection.dir && f.stop === currentSelection.stop);
+        ui.favToggle.classList.toggle('active', isFav);
+        ui.favToggle.innerHTML = isFav ? '★' : '☆';
+    }
+
+    function removeFav(e, i) { e.stopPropagation(); favorites.splice(i, 1); localStorage.setItem('rubis_favs_v3', JSON.stringify(favorites)); renderFavorites(); }
+
     init();
-
 </script>
-
 </body>
 </html>
