@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rubis - Ligne 10</title>
+    <style>
+        :root {
+            --primary: #ce0033; /* Rouge Rubis */
+            --primary-dark: #a30029;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+            --accent: #10b981; /* Vert pour prochain bus */
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(206, 0, 51, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            min-height: 80vh;
+        }
+
+        /* VIEWS (Home vs Schedule) */
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        /* FAVORITES GRID */
+        .fav-grid {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .fav-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+            position: relative;
+        }
+        .fav-item:active { transform: scale(0.98); background: #fafafa; }
+        .fav-item-stop { font-weight: 700; font-size: 1.05rem; display: block; }
+        .fav-item-dir { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; display: block; }
+        .fav-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #ef4444;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .empty-state { text-align: center; color: var(--text-light); padding: 1rem; font-style: italic; }
+
+        /* FORM CONTROLS */
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: #f9fafb;
+            color: var(--text-main);
+            margin-bottom: 1.2rem;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+        select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(206, 0, 51, 0.1); }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary:active { background-color: var(--primary-dark); }
+
+        /* SCHEDULE LIST */
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .stop-name-display { font-size: 1.3rem; font-weight: 800; line-height: 1.2; }
+        .direction-display { font-size: 0.9rem; color: var(--text-light); }
+        
+        .fav-toggle {
+            background: none;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .fav-toggle.active {
+            border-color: #fbbf24;
+            color: #fbbf24;
+            background: #fffbeb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: #e5e7eb;
+            color: var(--text-main);
+        }
+
+        .time-list { list-style: none; padding: 0; }
+        .time-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border-left: 4px solid transparent;
+        }
+        
+        .time-item.past { opacity: 0.6; background: #f3f4f6; }
+        .time-item.next { border-left-color: var(--accent); background: #ecfdf5; }
+        
+        .time-val { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-main); }
+        .time-diff { font-size: 0.9rem; font-weight: 600; color: var(--text-light); }
+        .time-item.next .time-diff { color: var(--accent); }
+
+        /* FOOTER */
+        footer { text-align: center; color: #9ca3af; font-size: 0.75rem; padding: 2rem 0; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div id="header-title">Ligne 10</div>
+    <button id="back-btn" class="header-btn" style="display: none;" onclick="goHome()">← Retour</button>
+</header>
+
+<div class="container">
+
+    <div id="view-home" class="view active">
+        
+        <div class="section-title">Mes Favoris</div>
+        <div id="fav-container" class="fav-grid">
+            </div>
+
+        <div style="height: 2rem;"></div>
+
+        <div class="card">
+            <div class="section-title" style="margin-top:0;">Rechercher un horaire</div>
+            
+            <label>Direction</label>
+            <select id="dir-select" onchange="populateStops()">
+                <option value="dir1">Direction Bourg-en-Bresse</option>
+                <option value="dir2">Direction ATTIGNAT (via Viriat)</option>
+            </select>
+
+            <label>Arrêt</label>
+            <select id="stop-select">
+                </select>
+
+            <button class="btn-primary" onclick="goToSchedule()">Voir les horaires</button>
+        </div>
+    </div>
+
+    <div id="view-schedule" class="view">
+        <div class="schedule-header">
+            <div>
+                <div id="display-stop-name" class="stop-name-display">Arrêt</div>
+                <div id="display-dir-name" class="direction-display">Direction</div>
+            </div>
+            <button id="fav-toggle-btn" class="fav-toggle" onclick="toggleCurrentFav()">★</button>
+        </div>
+
+        <div id="day-status" class="status-badge">Chargement...</div>
+
+        <ul id="time-list" class="time-list">
+            </ul>
+    </div>
+
+    <footer>
+        Horaires valables jusqu'en août 2026.<br>
+        Application non-officielle basée sur les données Rubis.
+    </footer>
+</div>
+
+<script>
+    // --- 1. RAW DATA (INTEGRATION 100% FIDÈLE) ---
+    // J'utilise un format brut parsé au démarrage pour garantir l'exactitude.
+
+    const rawDir1Scolaire = `
+Romenay - Place 5:25 6:15 7:15 - - - - - 12:30 13:30 - - 16:50 18:00
+St-Trivier-de-Courtes -Prédela Dîme 5:30 6:20 7:20 - - - - - 12:35 13:35 - - 16:55 18:05
+Mantenay-Montlin - Bourg 5:32 6:22 7:22 - - - - - 12:37 13:37 - - 16:57 18:07
+St-Julien-sur-Reyssouze- Village 5:34 6:25 7:25 - - - - - 12:39 13:39 - - 17:00 18:09
+Jayat -Les Neuves 5:36 6:27 7:27 - - - - - 12:41 13:41 - - 17:02 18:11
+Jayat - Relais 5:39 6:30 7:30 - - - - - 12:44 13:44 - - 17:05 18:14
+Jayat -La Barronnière 5:42 6:33 7:33 - - - - - 12:47 13:47 - - 17:08 18:17
+Jayat - Cezilles 5:44 6:36 7:36 - 9:00 9:54 11:00 12:00 12:49 13:49 15:00 16:05 17:11 18:19
+Montrevel-en-Bresse- BresseCocagne 5:45 6:37 7:37 - 9:01 9:55 11:01 12:01 12:50 13:50 15:01 16:06 17:12 18:20
+Montrevel-En-Bresse-Collège - - 7:38 - - - - - - - - - 17:13 -
+Montrevel-en-Bresse - Charles de Gaulle 5:46 6:40 7:40 8:20 9:02 9:56 11:02 12:02 12:51 13:51 15:02 16:07 17:15 18:21
+Malafretaz -La Guinguette 5:48 6:42 7:42 8:22 9:04 9:58 11:04 12:04 12:53 13:53 15:04 16:09 17:17 18:23
+Malafretaz -Pillebois 5:49 6:43 7:43 8:23 9:05 9:59 11:05 12:05 12:54 13:54 15:05 16:10 17:18 18:24
+Bresse-Vallons -Les Bruyères 5:50 6:44 7:44 8:24 9:06 10:00 11:06 12:06 12:55 13:55 15:06 16:11 17:19 18:25
+Bresse-Vallons -ZA Boisd'Arche 5:51 6:45 7:45 8:25 9:07 10:01 11:07 12:07 12:56 13:56 15:07 16:12 17:20 18:26
+Attignat - Village 5:53 6:47 7:47 8:27 9:09 10:03 11:09 12:09 12:58 13:58 15:09 16:14 17:22 18:28
+Attignat -Charmeil 5:55 6:49 7:49 8:29 9:11 10:05 11:11 12:11 13:00 14:00 15:11 16:16 17:24 18:30
+Attignat - VacagnoleColombier 5:56 6:50 7:50 8:30 9:12 10:06 11:12 12:12 13:01 14:01 15:12 16:17 17:25 18:31
+Attignat - VacagnoleCharriat 5:58 6:52 7:52 8:31 9:14 10:08 11:14 12:14 13:03 14:03 15:14 16:19 17:27 18:33
+Viriat - HôpitalFleyriat 6:02 6:59 7:59 8:37 9:18 10:13 11:18 12:18 13:08 14:08 15:18 16:26 17:35 18:38
+Neuve 6:05 7:03 8:03 8:40 9:20 10:16 11:20 12:20 13:11 14:11 15:21 16:30 17:39 18:41
+Edouard Herriot 6:07 7:06 8:06 8:42 9:22 10:19 11:22 12:22 13:14 14:14 15:23 16:33 17:42 18:44
+Carré Amiot (Quai A) 6:10 7:10 8:10 8:45 9:25 10:23 11:25 12:25 13:18 14:18 15:26 16:37 17:48 18:48
+Charité Université 6:14 7:15 8:15 8:49 9:29 10:27 11:29 12:29 13:22 14:22 15:30 16:41 17:53 18:52
+Sémard Gare 6:17 7:18 8:18 8:52 9:32 10:30 11:32 12:32 13:25 14:25 15:33 16:44 17:56 18:55
+Plein Soleil 6:20 7:21 8:21 - 9:35 10:33 11:35 12:35 13:28 14:28 15:36 16:47 17:59 18:58
+CentreCommercialede Brou 6:27 7:29 8:29 - 9:42 10:40 11:43 12:43 13:35 14:35 15:44 16:55 18:07 19:05
+Croix Blanche 6:28 7:31 8:31 - 9:43 10:41 11:44 12:44 13:36 14:36 15:45 16:57 18:09 19:06
+RenaultTrucks 6:31 7:36 8:36 - 9:46 10:44 11:48 12:48 13:39 14:39 15:49 17:01 18:14 19:09
+St-Just -Mairie 6:35 7:40 8:40 - 9:50 10:48 11:52 12:52 13:43 14:43 15:53 17:05 18:18 19:13
+Fougères 6:36 7:41 8:41 - 9:51 10:49 11:53 12:53 13:44 14:44 15:54 17:06 18:19 19:14
+Ceyzériat -ZA LaTeppe 6:38 7:43 8:44 - 9:53 10:51 11:54 12:54 13:46 14:46 15:56 17:08 18:21 19:16
+Ceyzériat - Domagne 6:46 7:51 8:52 - 10:01 10:59 12:02 13:02 13:54 14:54 16:04 17:16 18:29 19:24
+Ceyzériat - Mairie 6:47 7:52 8:53 - 10:02 11:00 12:03 13:03 13:55 14:55 16:05 17:17 18:30 19:26`;
+
+    // Structure Vacances Dir 1 (Romenay -> Ceyzériat)
+    const rawDir1Vacs = [
+        {stop:"Romenay - Place", a:"05:25|06:15|07:15|13:30|18:00", b:"05:25|06:15|07:15|13:30|18:00"},
+        {stop:"St-Trivier-de-Courtes -Prédela Dîme", a:"05:30|06:20|07:20|13:35|18:05", b:"05:30|06:20|07:20|13:35|18:05"},
+        {stop:"Mantenay-Montlin - Bourg", a:"05:32|06:22|07:22|13:37|18:07", b:"05:32|06:22|07:22|13:37|18:07"},
+        {stop:"St-Julien-sur-Reyssouze- Village", a:"05:34|06:25|07:25|13:39|18:09", b:"05:34|06:25|07:25|13:39|18:09"},
+        {stop:"Jayat -Les Neuves", a:"05:36|06:27|07:27|13:41|18:11", b:"05:36|06:27|07:27|13:41|18:11"},
+        {stop:"Jayat - Relais", a:"05:39|06:30|07:30|13:44|18:14", b:"05:39|06:30|07:30|13:44|18:14"},
+        {stop:"Jayat -La Barronnière", a:"05:42|06:33|07:33|13:47|18:17", b:"05:42|06:33|07:33|13:47|18:17"},
+        {stop:"Jayat - Cezilles", a:"05:44|06:36|07:36|10:24|13:49|15:00|16:05|18:19", b:"05:44|06:36|07:36|10:24|13:49|15:00|16:05|18:19"},
+        {stop:"Montrevel-en-Bresse- BresseCocagne", a:"05:45|06:37|07:37|10:25|13:50|15:01|16:06|18:20", b:"05:45|06:37|07:37|10:25|13:50|15:01|16:06|18:20"},
+        {stop:"Montrevel-en-Bresse - Charles de Gaulle", a:"05:46|06:40|07:40|10:26|13:51|15:02|16:07|18:21", b:"05:46|06:40|07:40|10:26|13:51|15:02|16:07|18:21"},
+        {stop:"Malafretaz -La Guinguette", a:"05:48|06:42|07:42|10:28|13:53|15:04|16:09|18:23", b:"05:48|06:42|07:42|10:28|13:57|15:08|16:13|18:27"},
+        {stop:"Malafretaz -Pillebois", a:"05:49|06:43|07:43|10:29|13:54|15:05|16:10|18:24", b:"05:49|06:43|07:43|10:29|13:58|15:09|16:14|18:28"},
+        {stop:"Bresse-Vallons -Les Bruyères", a:"05:50|06:44|07:44|10:30|13:55|15:06|16:11|18:25", b:"05:50|06:44|07:44|10:30|13:59|15:10|16:15|18:29"},
+        {stop:"Bresse-Vallons -ZA Boisd'Arche", a:"05:51|06:45|07:45|10:31|13:56|15:07|16:12|18:26", b:"05:51|06:45|07:45|10:31|14:00|15:11|16:16|18:30"},
+        {stop:"Attignat - Village", a:"05:53|06:47|07:47|10:33|13:58|15:09|16:14|18:28", b:"05:53|06:47|07:47|10:33|14:02|15:13|16:18|18:32"},
+        {stop:"Attignat -Charmeil", a:"05:55|06:49|07:49|10:35|14:00|15:11|16:16|18:30", b:"05:55|06:49|07:49|10:35|14:04|15:15|16:20|18:34"},
+        {stop:"Attignat - VacagnoleColombier", a:"05:56|06:50|07:50|10:36|14:01|15:12|16:17|18:31", b:"05:56|06:50|07:50|10:36|14:05|15:16|16:21|18:35"},
+        {stop:"Attignat - VacagnoleCharriat", a:"05:58|06:52|07:52|10:38|14:03|15:14|16:19|18:33", b:"05:58|06:52|07:52|10:38|14:07|15:18|16:23|18:37"},
+        {stop:"Viriat - HôpitalFleyriat", a:"06:02|06:59|07:59|10:43|14:08|15:18|16:26|18:38", b:"06:02|06:59|07:59|10:43|14:12|15:22|16:30|18:42"},
+        {stop:"Neuve", a:"06:05|07:03|08:03|10:46|14:11|15:21|16:30|18:41", b:"06:05|07:03|08:03|10:46|14:15|15:25|16:34|18:45"},
+        {stop:"Edouard Herriot", a:"06:07|07:06|08:06|10:49|14:14|15:23|16:33|18:44", b:"06:07|07:06|08:06|10:49|14:18|15:27|16:37|18:48"},
+        {stop:"Carré Amiot (Quai A)", a:"06:10|07:10|08:10|10:53|14:18|15:26|16:37|18:48", b:"06:10|07:10|08:10|10:53|14:22|15:30|16:41|18:52"},
+        {stop:"Charité Université", a:"06:14|07:15|08:15|10:57|14:22|15:30|16:41|18:52", b:"06:14|07:15|08:15|10:57|14:26|15:34|16:45|18:56"},
+        {stop:"Sémard Gare", a:"06:17|07:18|08:18|11:00|14:25|15:33|16:44|18:55", b:"06:17|07:18|08:18|11:00|14:29|15:37|16:48|18:59"},
+        {stop:"Plein Soleil", a:"06:20|07:21|08:21|11:03|14:28|15:36|16:47|18:58", b:"06:20|07:21|08:21|11:03|14:32|15:40|16:51|19:02"},
+        {stop:"CentreCommercialede Brou", a:"06:27|07:29|08:29|11:10|14:35|15:44|16:55|19:05", b:"06:27|07:29|08:29|11:10|14:39|15:48|16:59|19:09"},
+        {stop:"Croix Blanche", a:"06:28|07:31|08:31|11:11|14:36|15:45|16:57|19:06", b:"06:28|07:31|08:31|11:11|14:40|15:49|17:01|19:10"},
+        {stop:"RenaultTrucks", a:"06:31|07:36|08:36|11:14|14:39|15:49|17:01|19:09", b:"06:31|07:36|08:36|11:14|14:43|15:53|17:05|19:13"},
+        {stop:"St-Just -Mairie", a:"06:35|07:40|08:40|11:18|14:43|15:53|17:05|19:13", b:"06:35|07:40|08:40|11:18|14:47|15:57|17:09|19:17"},
+        {stop:"Fougères", a:"06:36|07:41|08:41|11:19|14:44|15:54|17:06|19:14", b:"06:36|07:41|08:41|11:19|14:48|15:58|17:10|19:18"},
+        {stop:"Ceyzériat -ZA LaTeppe", a:"06:38|07:43|08:44|11:21|14:46|15:56|17:08|19:16", b:"06:38|07:43|08:44|11:21|14:50|16:00|17:12|19:20"},
+        {stop:"Ceyzériat - Domagne", a:"06:46|07:51|08:52|11:29|14:54|16:04|17:16|19:24", b:"06:46|07:51|08:52|11:29|14:58|16:08|17:20|19:28"},
+        {stop:"Ceyzériat - Mairie", a:"06:47|07:52|08:53|11:30|14:55|16:05|17:17|19:26", b:"06:47|07:52|08:53|11:30|14:59|16:09|17:21|19:30"}
+    ];
+
+    // Data Direction 2 (Ceyzériat -> Romenay/Attignat)
+    // Format: Array of objects {stop, week, wed, vac_a, vac_b}
+    const rawDir2Data = [
+        {s:"Ceyzériat - Mairie", w:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:35|15:40|16:30|16:35|17:35|18:45|19:45", m:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:35|15:40|16:35|17:35|18:45|19:45", va:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:40|16:35|17:35|18:45|19:45", vb:"07:05|08:10|09:20|10:20|11:20|12:20|13:20|14:20|15:40|16:35|17:35|18:45|19:45"},
+        {s:"Ceyzériat - Domagne", w:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:36|15:41|16:30|16:36|17:36|18:46|19:46", m:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:36|15:41|16:36|17:36|18:46|19:46", va:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:41|16:36|17:36|18:46|19:46", vb:"07:06|08:11|09:21|10:21|11:21|12:21|13:21|14:21|15:41|16:36|17:36|18:46|19:46"},
+        {s:"Ceyzériat -ZA LaTeppe", w:"07:08|08:14|09:24|10:24|11:23|12:23|13:23|14:24|15:39|15:44|16:30|16:39|17:39|18:48|19:48", m:"07:08|08:14|09:24|10:24|11:23|12:23|13:23|14:24|15:39|15:44|16:39|17:39|18:48|19:48", va:"07:08|08:14|09:24|10:24|11:23|12:23|13:23|14:24|15:44|16:39|17:39|18:48|19:48", vb:"07:08|08:14|09:24|10:24|11:23|12:23|13:23|14:24|15:44|16:39|17:39|18:48|19:48"},
+        {s:"Fougères", w:"07:16|08:24|09:34|10:32|11:31|12:31|13:31|14:32|15:47|15:52|16:30|16:47|17:47|18:56|19:51", m:"07:16|08:24|09:34|10:32|11:31|12:31|13:31|14:32|15:47|15:52|16:47|17:47|18:56|19:51", va:"07:16|08:24|09:34|10:32|11:31|12:31|13:31|14:32|15:52|16:47|17:47|18:56|19:51", vb:"07:16|08:24|09:34|10:32|11:31|12:31|13:31|14:32|15:52|16:47|17:47|18:56|19:51"},
+        {s:"St-Just -Mairie", w:"07:17|08:25|09:35|10:33|11:32|12:32|13:32|14:33|15:48|15:53|16:30|16:48|17:48|18:57|19:52", m:"07:17|08:25|09:35|10:33|11:32|12:32|13:32|14:33|15:48|15:53|16:48|17:48|18:57|19:52", va:"07:17|08:25|09:35|10:33|11:32|12:32|13:32|14:33|15:53|16:48|17:48|18:57|19:52", vb:"07:17|08:25|09:35|10:33|11:32|12:32|13:32|14:33|15:53|16:48|17:48|18:57|19:52"},
+        {s:"RenaultTrucks", w:"07:21|08:29|09:39|10:37|11:36|12:36|13:36|14:37|15:52|15:57|16:30|16:52|17:52|19:01|19:56", m:"07:21|08:29|09:39|10:37|11:36|12:36|13:36|14:37|15:52|15:57|16:52|17:52|19:01|19:56", va:"07:21|08:29|09:39|10:37|11:36|12:36|13:36|14:37|15:57|16:52|17:52|19:01|19:56", vb:"07:21|08:29|09:39|10:37|11:36|12:36|13:36|14:37|15:57|16:52|17:52|19:01|19:56"},
+        {s:"Croix Blanche", w:"07:23|08:31|09:41|10:39|11:38|12:38|13:38|14:39|15:54|15:59|16:30|16:54|17:54|19:03|19:58", m:"07:23|08:31|09:41|10:39|11:38|12:38|13:38|14:39|15:54|15:59|16:54|17:54|19:03|19:58", va:"07:23|08:31|09:41|10:39|11:38|12:38|13:38|14:39|15:59|16:54|17:54|19:03|19:58", vb:"07:23|08:31|09:41|10:39|11:38|12:38|13:38|14:39|15:59|16:54|17:54|19:03|19:58"},
+        {s:"CentreCommercialede Brou", w:"07:25|08:33|09:43|10:41|11:40|12:40|13:40|14:41|15:56|16:01|16:30|16:56|17:56|19:05|20:00", m:"07:25|08:33|09:43|10:41|11:40|12:40|13:40|14:41|15:56|16:01|16:56|17:56|19:05|20:00", va:"07:25|08:33|09:43|10:41|11:40|12:40|13:40|14:41|16:01|16:56|17:56|19:05|20:00", vb:"07:25|08:33|09:43|10:41|11:40|12:40|13:40|14:41|16:01|16:56|17:56|19:05|20:00"},
+        {s:"Plein Soleil", w:"07:30|08:38|09:48|10:46|11:45|12:45|13:45|14:46|16:01|16:06|16:30|17:01|18:01|19:10|20:05", m:"07:30|08:38|09:48|10:46|11:45|12:45|13:45|14:46|16:01|16:06|17:01|18:01|19:10|20:05", va:"07:30|08:38|09:48|10:46|11:45|12:45|13:45|14:46|16:06|17:01|18:01|19:10|20:05", vb:"07:30|08:38|09:48|10:46|11:45|12:45|13:45|14:46|16:06|17:01|18:01|19:10|20:05"},
+        {s:"Sémard Gare", w:"07:35|08:43|09:53|10:51|11:50|12:50|13:50|14:51|16:06|16:11|17:06|18:06|19:15|20:10", m:"07:35|08:43|09:53|10:51|11:50|12:50|13:50|14:51|16:06|16:11|17:06|18:06|19:15|20:10", va:"07:35|08:43|09:53|10:51|11:50|12:50|13:50|14:51|16:11|17:06|18:06|19:15|20:10", vb:"07:35|08:43|09:53|10:51|11:50|12:50|13:50|14:51|16:11|17:06|18:06|19:15|20:10"},
+        {s:"Charité Université", w:"07:40|08:48|09:58|10:56|11:55|12:55|13:55|14:56|16:11|16:16|16:35|17:11|18:11|19:20|20:15", m:"07:40|08:48|09:58|10:56|11:55|12:55|13:55|14:56|16:11|16:16|17:11|18:11|19:20|20:15", va:"07:40|08:48|09:58|10:56|11:55|12:55|13:55|14:56|16:16|17:11|18:11|19:20|20:15", vb:"07:40|08:48|09:58|10:56|11:55|12:55|13:55|14:56|16:16|17:11|18:11|19:20|20:15"},
+        {s:"Carré Amiot (Quai B)", w:"07:43|08:51|10:01|10:59|11:58|12:58|13:58|14:59|16:14|16:19|16:38|17:16|18:15|19:23|20:18", m:"07:43|08:51|10:01|10:59|11:58|12:58|13:58|14:59|16:14|16:19|17:16|18:15|19:23|20:18", va:"07:43|08:51|10:01|10:59|11:58|12:58|13:58|14:59|16:19|17:16|18:15|19:23|20:18", vb:"07:43|08:51|10:01|10:59|11:58|12:58|13:58|14:59|16:19|17:16|18:15|19:23|20:18"},
+        {s:"Edouard Herriot", w:"07:45|08:53|10:03|11:01|12:00|13:00|14:00|15:01|16:16|16:21|16:40|17:18|18:17|19:25|20:20", m:"07:45|08:53|10:03|11:01|12:00|13:00|14:00|15:01|16:16|16:21|17:18|18:17|19:25|20:20", va:"07:45|08:53|10:03|11:01|12:00|13:00|14:00|15:01|16:21|17:18|18:17|19:25|20:20", vb:"07:45|08:53|10:03|11:01|12:00|13:00|14:00|15:01|16:21|17:18|18:17|19:25|20:20"},
+        {s:"Neuve", w:"07:48|08:56|10:06|11:04|12:02|13:02|14:02|15:04|16:19|16:24|16:43|17:22|18:20|19:28|20:22", m:"07:48|08:56|10:06|11:04|12:02|13:02|14:02|15:04|16:19|16:24|17:22|18:20|19:28|20:22", va:"07:48|08:56|10:06|11:04|12:02|13:02|14:02|15:04|16:24|17:22|18:20|19:28|20:22", vb:"07:48|08:56|10:06|11:04|12:02|13:02|14:02|15:04|16:24|17:22|18:20|19:28|20:22"},
+        {s:"Viriat - HôpitalFleyriat", w:"07:50|08:58|10:08|11:06|12:04|13:04|14:04|15:06|16:21|16:26|16:45|17:25|18:23|19:30|20:24", m:"07:50|08:58|10:08|11:06|12:04|13:04|14:04|15:06|16:21|16:26|17:25|18:23|19:30|20:24", va:"07:50|08:58|10:08|11:06|12:04|13:04|14:04|15:06|16:26|17:25|18:23|19:30|20:24", vb:"07:50|08:58|10:08|11:06|12:04|13:04|14:04|15:06|16:26|17:25|18:23|19:30|20:24"},
+        {s:"Attignat - VacagnoleCharriat", w:"07:56|09:04|10:14|11:12|12:09|13:09|14:09|15:12|16:27|16:32|16:51|17:32|18:30|19:36|20:29", m:"07:56|09:04|10:14|11:12|12:09|13:09|14:09|15:12|16:27|16:32|17:32|18:30|19:36|20:29", va:"07:56|09:04|10:14|10:14|12:39|12:39|16:32|16:32|17:32|17:32|18:30|20:29", vb:"07:56|09:04|10:14|10:14|12:39|12:39|16:32|16:32|17:32|17:32|18:30|20:29"},
+        {s:"Attignat - VacagnoleColombier", w:"07:57|09:05|10:15|11:13|12:10|13:10|14:10|15:13|16:28|16:33|16:52|17:33|18:31|19:37|20:30", m:"07:57|09:05|10:15|11:13|12:10|13:10|14:10|15:13|16:28|16:33|17:33|18:31|19:37|20:30", va:"07:57|09:05|10:15|10:15|12:40|12:40|16:33|16:33|17:33|17:33|18:31|20:30", vb:"07:57|09:05|10:15|10:15|12:40|12:40|16:33|16:33|17:33|17:33|18:31|20:30"},
+        {s:"Attignat -Charmeil", w:"07:58|09:06|10:16|11:14|12:11|13:11|14:11|15:14|16:29|16:34|16:53|17:34|18:32|19:38|20:31", m:"07:58|09:06|10:16|11:14|12:11|13:11|14:11|15:14|16:29|16:34|17:34|18:32|19:38|20:31", va:"07:58|09:06|10:16|10:16|12:41|12:41|16:34|16:34|17:34|17:34|18:32|20:31", vb:"07:58|09:06|10:16|10:16|12:41|12:41|16:34|16:34|17:34|17:34|18:32|20:31"},
+        {s:"Attignat - Village", w:"08:00|09:08|10:18|11:16|12:13|13:13|14:13|15:16|16:31|16:36|16:55|17:36|18:34|19:40|20:33", m:"08:00|09:08|10:18|11:16|12:13|13:13|14:13|15:16|16:31|16:36|17:36|18:34|19:40|20:33", va:"08:00|09:08|10:18|10:18|12:43|12:43|16:36|16:36|17:36|17:36|18:34|20:33", vb:"08:00|09:08|10:18|10:18|12:43|12:43|16:36|16:36|17:36|17:36|18:34|20:33"},
+        {s:"Bresse-Vallons -ZA Boisd'Arche", w:"08:02|09:10|10:20|11:18|12:15|13:15|14:15|15:18|16:33|16:38|16:57|17:38|18:36|19:42|20:35", m:"08:02|09:10|10:20|11:18|12:15|13:15|14:15|15:18|16:33|16:38|17:38|18:36|19:42|20:35", va:"08:02|09:10|10:20|10:20|12:45|12:45|16:38|16:38|17:38|17:38|18:36|20:35", vb:"08:02|09:10|10:20|10:20|12:45|12:45|16:38|16:38|17:38|17:38|18:36|20:35"},
+        {s:"Bresse-Vallons -Les Bruyères", w:"08:03|09:11|10:21|11:19|12:16|13:16|14:16|15:19|16:34|16:39|16:58|17:39|18:37|19:43|20:36", m:"08:03|09:11|10:21|11:19|12:16|13:16|14:16|15:19|16:34|16:39|17:39|18:37|19:43|20:36", va:"08:03|09:11|10:21|10:21|12:46|12:46|16:39|16:39|17:39|17:39|18:37|20:36", vb:"08:03|09:11|10:21|10:21|12:46|12:46|16:39|16:39|17:39|17:39|18:37|20:36"},
+        {s:"Malafretaz -Pillebois", w:"08:04|09:12|10:22|11:20|12:17|13:17|14:17|15:20|16:35|16:40|16:59|17:40|18:38|19:44|20:37", m:"08:04|09:12|10:22|11:20|12:17|13:17|14:17|15:20|16:35|16:40|17:40|18:38|19:44|20:37", va:"08:04|09:12|10:22|10:22|12:47|12:47|16:40|16:40|17:40|17:40|18:38|20:37", vb:"08:04|09:12|10:22|10:22|12:47|12:47|16:40|16:40|17:40|17:40|18:38|20:37"},
+        {s:"Malafretaz -La Guinguette", w:"08:05|09:13|10:23|11:21|12:18|13:18|14:18|15:21|16:36|16:41|17:00|17:41|18:39|19:45|20:38", m:"08:05|09:13|10:23|11:21|12:18|13:18|14:18|15:21|16:36|16:41|17:41|18:39|19:45|20:38", va:"08:05|09:13|10:23|10:23|12:48|12:48|16:41|16:41|17:41|17:41|18:39|20:38", vb:"08:05|09:13|10:23|10:23|12:48|12:48|16:41|16:41|17:41|17:41|18:39|20:38"},
+        {s:"Montrevel-en-Bresse - Charles de Gaulle", w:"08:07|09:15|10:25|11:23|12:20|13:20|14:20|15:23|16:38|16:43|17:02|17:44|18:42|19:47|20:44", m:"08:07|09:15|10:25|11:23|12:20|13:20|14:20|15:23|16:38|16:43|17:44|18:42|19:47|20:44", va:"08:07|09:15|10:25|10:29|12:50|12:54|16:43|16:47|17:44|17:47|18:42|20:44", vb:"08:07|09:15|10:25|10:29|12:50|12:54|16:43|16:47|17:44|17:47|18:42|20:44"},
+        {s:"Montrevel-en-Bresse- BresseCocagne", w:"08:11|09:17|10:27|11:25|12:24|13:24|14:24|15:25|16:45|17:48|18:45|19:51|20:47", m:"08:11|09:17|10:27|11:25|12:24|13:24|14:24|15:25|17:48|18:45|19:51|20:47", va:"08:11|09:17|10:27|10:31|12:52|12:56|16:45|16:49|17:48|17:51|18:45|20:47", vb:"08:11|09:17|10:27|10:31|12:52|12:56|16:45|16:49|17:48|17:51|18:45|20:47"},
+        {s:"Jayat - Cezilles", w:"08:11|09:17|10:27|11:25|15:25|20:47", m:"08:11|09:17|10:27|11:25|15:25|20:47", va:"08:11|09:17|10:27|10:31|20:47", vb:"08:11|09:17|10:27|10:31|20:47"},
+        {s:"Jayat -La Barronnière", w:"12:27|13:27|14:27|16:49|17:52|18:49|19:55", m:"12:27|13:27|14:27|17:52|18:49|19:55", va:"12:56|13:00|16:49|16:53|17:52|17:55|18:49", vb:"12:56|13:00|16:49|16:53|17:52|17:55|18:49"},
+        {s:"Jayat - Relais", w:"12:29|13:29|14:29|16:51|17:54|18:51|19:57", m:"12:29|13:29|14:29|17:54|18:51|19:57", va:"12:58|13:02|16:51|16:55|17:54|17:57|18:51", vb:"12:58|13:02|16:51|16:55|17:54|17:57|18:51"},
+        {s:"Jayat -Les Neuves", w:"12:31|13:31|14:31|16:53|17:56|18:53|19:59", m:"12:31|13:31|14:31|17:56|18:53|19:59", va:"13:00|13:04|16:53|16:57|17:56|17:59|18:53", vb:"13:00|13:04|16:53|16:57|17:56|17:59|18:53"},
+        {s:"St-Julien-sur-Reyssouze- Village", w:"12:33|13:33|14:33|16:55|17:58|18:55|20:01", m:"12:33|13:33|14:33|17:58|18:55|20:01", va:"13:02|13:06|16:55|16:59|17:58|18:01|18:55", vb:"13:02|13:06|16:55|16:59|17:58|18:01|18:55"},
+        {s:"Mantenay-Montlin - Bourg", w:"12:37|13:37|14:37|16:59|18:02|18:59|20:05", m:"12:37|13:37|14:37|18:02|18:59|20:05", va:"13:06|13:10|16:59|17:03|18:02|18:05|18:59", vb:"13:06|13:10|16:59|17:03|18:02|18:05|18:59"},
+        {s:"St-Trivier-de-Courtes -Prédela Dîme", w:"12:40|13:40|14:40|17:02|18:05|19:02|20:08", m:"12:40|13:40|14:40|18:05|19:02|20:08", va:"13:09|13:13|17:02|17:06|18:05|18:08|19:02", vb:"13:09|13:13|17:02|17:06|18:05|18:08|19:02"},
+        {s:"Romenay - Place", w:"12:45|13:45|14:45|17:07|18:10|19:07|20:13", m:"12:45|13:45|14:45|18:10|19:07|20:13", va:"13:14|13:18|17:07|17:11|18:10|18:13|19:07", vb:"13:14|13:18|17:07|17:11|18:10|18:13|19:07"}
+    ];
+
+    // --- 2. CONFIGURATION DATE & VACANCES ---
+    
+    // Dates vacances Zone A (2025-2026)
+    const holidays = [
+        { start: '2025-10-18', end: '2025-11-03' },
+        { start: '2025-12-20', end: '2026-01-05' },
+        { start: '2026-02-07', end: '2026-02-23' },
+        { start: '2026-04-04', end: '2026-04-20' },
+        // Été handled separately by date check >= 1st July
+    ];
+
+    const joursFeries = [
+        "2025-12-25", "2026-01-01", "2026-04-06", "2026-05-01", "2026-05-08", "2026-05-14", "2026-05-25", "2026-07-14", "2026-08-15"
+    ];
+
+    let appData = {
+        dir1: { name: "Direction Bourg-en-Bresse", stops: {} },
+        dir2: { name: "Direction ATTIGNAT (via Viriat)", stops: {} }
+    };
+
+    // --- 3. PARSING & LOGIC ---
+
+    function parseDir1Scolaire() {
+        const lines = rawDir1Scolaire.trim().split('\n');
+        lines.forEach(line => {
+            // Regex to separate Stop Name from times. Matches everything until the first digit.
+            const match = line.match(/^(.+?)\s+(\d.*)$/);
+            if(match) {
+                const stopName = match[1].trim();
+                const timesStr = match[2];
+                // Split by space, clean dashes
+                const times = timesStr.split(/\s+/).filter(t => t.match(/\d{1,2}:\d{2}/));
+                
+                if(!appData.dir1.stops[stopName]) appData.dir1.stops[stopName] = {scolaire:[], vac_a:[], vac_b:[]};
+                appData.dir1.stops[stopName].scolaire = times;
+            }
+        });
+
+        // Special rule: Montrevel-en-Bresse - Collège
+        // Note: "l'avant dernier horaire... Ne dessert pas le mercredi"
+        // Le parsing automatique ne peut pas deviner l'index colonne exact.
+        // Mais nous avons identifié que l'avant dernier horaire est celui de ~17h.
+        // Pour Collège, la ligne est: "- - 7:38 - ... 17:13 -"
+        // Donc si Mercredi, on retire 17:13 de Collège.
+    }
+
+    function parseDir1Vacances() {
+        rawDir1Vacs.forEach(item => {
+            const s = item.stop.trim();
+            if(!appData.dir1.stops[s]) appData.dir1.stops[s] = {scolaire:[], vac_a:[], vac_b:[]};
+            appData.dir1.stops[s].vac_a = item.a.split('|');
+            appData.dir1.stops[s].vac_b = item.b.split('|');
+        });
+    }
+
+    function parseDir2() {
+        rawDir2Data.forEach(item => {
+            const s = item.s.trim();
+            if(!appData.dir2.stops[s]) appData.dir2.stops[s] = {week:[], wed:[], vac_a:[], vac_b:[]};
+            appData.dir2.stops[s].week = item.w.split('|');
+            appData.dir2.stops[s].wed = item.m.split('|');
+            appData.dir2.stops[s].vac_a = item.va.split('|');
+            appData.dir2.stops[s].vac_b = item.vb.split('|');
+        });
+    }
+
+    // Initialize Data
+    parseDir1Scolaire();
+    parseDir1Vacances();
+    parseDir2();
+
+
+    // --- 4. ENGINE ---
+
+    function getDayType() {
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const day = now.getDay(); // 0 Sun, 6 Sat
+        const month = now.getMonth() + 1; // 1-12
+        const dom = now.getDate();
+
+        // 1. Dimanche / Férié
+        if (day === 0 || joursFeries.includes(dateStr)) return { type: 'none', label: 'Dimanche / Férié (Aucun service)' };
+
+        // 2. Été (Start 1 July)
+        const isSummer = (month === 7 || month === 8); 
+
+        // 3. Vacances
+        let isVacance = isSummer;
+        if (!isVacance) {
+            for (let h of holidays) {
+                if (dateStr >= h.start && dateStr <= h.end) {
+                    isVacance = true;
+                    break;
+                }
+            }
+        }
+
+        // 4. Logic Selection
+        // "a" : Ne circule pas le samedi et l'été (Donc Vacances Semaine hors été)
+        // "b" : Circule uniquement le samedi et l'été
+        
+        if (day === 6) return { type: 'vac_b', label: 'Samedi (Horaires b)' };
+        
+        if (isVacance) {
+            if (isSummer) return { type: 'vac_b', label: 'Période Été (Horaires b)' };
+            return { type: 'vac_a', label: 'Vacances Scolaires (Horaires a)' };
+        }
+
+        // Scolaire
+        if (day === 3) return { type: 'scolaire_mercredi', label: 'Mercredi Scolaire' };
+        return { type: 'scolaire_semaine', label: 'Semaine Scolaire' };
+    }
+
+    function getTimesForStop(dirKey, stopName) {
+        const dayInfo = getDayType();
+        const dirData = appData[dirKey].stops[stopName];
+        if (!dirData) return null;
+
+        let times = [];
+
+        if (dirKey === 'dir1') {
+            // Direction 1 logic
+            if (dayInfo.type === 'none') return [];
+            if (dayInfo.type === 'vac_a') times = dirData.vac_a;
+            else if (dayInfo.type === 'vac_b') times = dirData.vac_b;
+            else {
+                // Scolaire
+                times = [...dirData.scolaire]; // Clone
+                // Special Rule Dir 1: Montrevel Collège Mercredi
+                if (dayInfo.type === 'scolaire_mercredi' && stopName.includes("Collège")) {
+                    // Remove 17:13 (Standardize comparison)
+                    times = times.filter(t => t !== "17:13");
+                }
+            }
+        } else {
+            // Direction 2 logic (Explicit fields)
+            if (dayInfo.type === 'none') return [];
+            if (dayInfo.type === 'vac_a') times = dirData.vac_a;
+            else if (dayInfo.type === 'vac_b') times = dirData.vac_b;
+            else if (dayInfo.type === 'scolaire_mercredi') times = dirData.wed;
+            else times = dirData.week;
+        }
+
+        return times;
+    }
+
+
+    // --- 5. UI CONTROLLER ---
+
+    const ui = {
+        views: { home: document.getElementById('view-home'), schedule: document.getElementById('view-schedule') },
+        favContainer: document.getElementById('fav-container'),
+        dirSelect: document.getElementById('dir-select'),
+        stopSelect: document.getElementById('stop-select'),
+        displayStop: document.getElementById('display-stop-name'),
+        displayDir: document.getElementById('display-dir-name'),
+        dayStatus: document.getElementById('day-status'),
+        timeList: document.getElementById('time-list'),
+        backBtn: document.getElementById('back-btn'),
+        favToggle: document.getElementById('fav-toggle-btn')
+    };
+
+    let currentSelection = { dir: 'dir1', stop: '' };
+    let favorites = JSON.parse(localStorage.getItem('rubis_favs_v2')) || [];
+
+    function init() {
+        populateStops();
+        renderFavorites();
+    }
+
+    function populateStops() {
+        const dir = ui.dirSelect.value;
+        const stops = Object.keys(appData[dir].stops);
+        ui.stopSelect.innerHTML = stops.map(s => `<option value="${s}">${s}</option>`).join('');
+        currentSelection.dir = dir;
+    }
+
+    // --- FAVORITES LOGIC ---
+
+    function renderFavorites() {
+        ui.favContainer.innerHTML = '';
+        if (favorites.length === 0) {
+            ui.favContainer.innerHTML = '<div class="empty-state">Aucun favori enregistré.</div>';
+            return;
+        }
+
+        favorites.forEach((fav, index) => {
+            const div = document.createElement('div');
+            div.className = 'fav-item';
+            // Find pretty name for direction
+            const dirName = appData[fav.dir].name;
+            div.innerHTML = `
+                <span class="fav-item-stop">${fav.stop}</span>
+                <span class="fav-item-dir">${dirName}</span>
+                <button class="fav-remove" onclick="removeFav(event, ${index})">×</button>
+            `;
+            div.onclick = (e) => {
+                if(e.target.className !== 'fav-remove') loadSchedule(fav.dir, fav.stop);
+            };
+            ui.favContainer.appendChild(div);
+        });
+    }
+
+    function removeFav(e, index) {
+        e.stopPropagation();
+        favorites.splice(index, 1);
+        localStorage.setItem('rubis_favs_v2', JSON.stringify(favorites));
+        renderFavorites();
+    }
+
+    function toggleCurrentFav() {
+        const index = favorites.findIndex(f => f.dir === currentSelection.dir && f.stop === currentSelection.stop);
+        if (index >= 0) {
+            favorites.splice(index, 1);
+            ui.favToggle.classList.remove('active');
+            ui.favToggle.innerHTML = '★'; // Outline
+        } else {
+            favorites.push({ dir: currentSelection.dir, stop: currentSelection.stop });
+            ui.favToggle.classList.add('active');
+            ui.favToggle.innerHTML = '★'; // Filled
+        }
+        localStorage.setItem('rubis_favs_v2', JSON.stringify(favorites));
+    }
+
+    function updateFavIconState() {
+        const isFav = favorites.some(f => f.dir === currentSelection.dir && f.stop === currentSelection.stop);
+        if (isFav) {
+            ui.favToggle.classList.add('active');
+        } else {
+            ui.favToggle.classList.remove('active');
+        }
+    }
+
+    // --- NAVIGATION ---
+
+    function goHome() {
+        ui.views.schedule.classList.remove('active');
+        ui.views.home.classList.add('active');
+        ui.backBtn.style.display = 'none';
+        renderFavorites(); // Refresh in case changed
+    }
+
+    function goToSchedule() {
+        const stop = ui.stopSelect.value;
+        const dir = ui.dirSelect.value;
+        loadSchedule(dir, stop);
+    }
+
+    function loadSchedule(dir, stop) {
+        currentSelection = { dir, stop };
+        
+        // Update Header Info
+        ui.displayStop.textContent = stop;
+        ui.displayDir.textContent = appData[dir].name;
+        
+        // Switch View
+        ui.views.home.classList.remove('active');
+        ui.views.schedule.classList.add('active');
+        ui.backBtn.style.display = 'block';
+        
+        // Update Fav Icon
+        updateFavIconState();
+
+        // Render Times
+        renderTimes();
+    }
+
+    function renderTimes() {
+        const times = getTimesForStop(currentSelection.dir, currentSelection.stop);
+        const dayInfo = getDayType();
+        
+        ui.dayStatus.textContent = dayInfo.label;
+        ui.timeList.innerHTML = '';
+
+        if (!times || times.length === 0) {
+            ui.timeList.innerHTML = '<li class="time-item"><span class="time-val">--:--</span><span>Aucun bus</span></li>';
+            return;
+        }
+
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        let hasNext = false;
+
+        times.forEach(t => {
+            const [h, m] = t.split(':').map(Number);
+            const busMinutes = h * 60 + m;
+            const diff = busMinutes - currentMinutes;
+
+            // Logic: Show if diff > -10 (Passé il y a moins de 10 min)
+            if (diff > -10) {
+                const li = document.createElement('li');
+                li.className = 'time-item';
+
+                // Format Display
+                let diffDisplay = '';
+                if (diff < 0) {
+                    li.classList.add('past');
+                    diffDisplay = `parti il y a ${Math.abs(diff)} min`;
+                } else if (diff === 0) {
+                    li.classList.add('next');
+                    diffDisplay = 'Maintenant';
+                    hasNext = true;
+                } else {
+                    if (!hasNext && diff > 0) {
+                        li.classList.add('next');
+                        hasNext = true;
+                    }
+                    if (diff < 60) diffDisplay = `dans ${diff} min`;
+                    else {
+                        const dh = Math.floor(diff/60);
+                        const dm = diff%60;
+                        diffDisplay = `dans ${dh}h ${dm}`;
+                    }
+                }
+
+                li.innerHTML = `
+                    <span class="time-val">${t}</span>
+                    <span class="time-diff">${diffDisplay}</span>
+                `;
+                ui.timeList.appendChild(li);
+            }
+        });
+
+        if (ui.timeList.children.length === 0) {
+            ui.timeList.innerHTML = '<li class="time-item" style="justify-content:center; color:#999;">Plus de passage aujourd\'hui</li>';
+        }
+    }
+
+    // Start
+    init();
+
+</script>
+
+</body>
+</html>
